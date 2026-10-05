@@ -82,7 +82,7 @@ function hostOf($: EngineInterface): Host {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
-      name: 'timeline',
+      name: 'call-timeline',
       description: 'Open the call timeline pane, export it, or browse past sessions',
       argumentHint: '[export [md|json|path] | history]',
     })
@@ -108,7 +108,7 @@ export const register: Register = on => {
     return next(e)
   })
 
-  on('command.run', { command: 'timeline' }, async ($, e) => {
+  on('command.run', { command: 'call-timeline' }, async ($, e) => {
     const [sub = '', ...rest] = e.args.trim().split(/\s+/)
     if (sub === 'export') {
       try {

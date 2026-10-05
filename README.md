@@ -26,17 +26,17 @@ A Claude Code plugin that adds a live **call-timeline** pane showing every skill
 The pane opens automatically when a session starts. To reopen it, run:
 
 ```
-/timeline
+/call-timeline
 ```
 
-`/timeline history` opens it on the list of past sessions.
+`/call-timeline history` opens it on the list of past sessions.
 
 ## Exporting
 
 ```
-/timeline export              # Markdown to .claude/call-timeline/timeline-<stamp>.md
-/timeline export json         # JSON to .claude/call-timeline/timeline-<stamp>.json
-/timeline export out/run.json # a path; .json writes JSON, anything else Markdown
+/call-timeline export              # Markdown to .claude/call-timeline/timeline-<stamp>.md
+/call-timeline export json         # JSON to .claude/call-timeline/timeline-<stamp>.json
+/call-timeline export out/run.json # a path; .json writes JSON, anything else Markdown
 ```
 
 `w` in the pane exports Markdown to the default location. While a past session is open, export writes that session.
