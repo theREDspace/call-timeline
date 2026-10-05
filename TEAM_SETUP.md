@@ -71,7 +71,7 @@ Start a new session; the timeline pane should open on its own (or run `/call-tim
 
 ## Step 4 — Turn it on for everyone in a project (no admin needed)
 
-Commit this to `.claude/settings.json` in any repo your team works in. Anyone who opens that repo in Claude Code is prompted to trust the marketplace and gets the plugin:
+Commit this to `.claude/settings.json` in any repo your team works in:
 
 ```json
 {
@@ -85,6 +85,12 @@ Commit this to `.claude/settings.json` in any repo your team works in. Anyone wh
     "call-timeline@<your-org>-plugins": true
   }
 }
+```
+
+These settings declare and enable the plugin but don't reliably install it. Claude Code may offer to install it when someone first trusts the folder, but that prompt often doesn't appear (in the desktop app, or in a folder already trusted). Each person should run this once from the repo root:
+
+```bash
+claude plugin install call-timeline@<your-org>-plugins --scope project
 ```
 
 `autoUpdate` is off by default for non-official marketplaces; setting it `true` means version bumps reach people without them running `claude plugin marketplace update`.

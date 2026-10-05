@@ -20,12 +20,17 @@ Commit this to `.claude/settings.json` at the root of your repo (merge the two k
 }
 ```
 
-Then start a new Claude Code session in that repo, in the terminal or the desktop app's Code tab:
+The settings tell Claude Code about the plugin, but they don't install it. Each person installs it once, from the repo root:
 
-1. Trust the `redspace-plugins` marketplace when Claude Code asks. That installs the plugin.
-2. The timeline pane opens on its own. If it doesn't, run `/call-timeline`.
+```bash
+claude plugin install call-timeline@redspace-plugins --scope project
+```
 
-Everyone who opens the repo gets the same prompt, so one commit sets it up for the whole team. You need read access to [theREDspace/call-timeline](https://github.com/theREDspace/call-timeline): Claude Code clones it with your own git credentials. `autoUpdate: true` brings in new versions without anyone running `claude plugin marketplace update`.
+Then start a new Claude Code session in that repo, in the terminal or the desktop app's Code tab. The timeline pane opens on its own. If it doesn't, run `/call-timeline`.
+
+When the folder is first trusted, Claude Code may ask to trust the `redspace-plugins` marketplace and install the plugin for you. That prompt often doesn't appear (in the desktop app, or in a folder you've already trusted), so run the install command anyway. If the plugin is already installed, the command does nothing.
+
+You need read access to [theREDspace/call-timeline](https://github.com/theREDspace/call-timeline): Claude Code clones it with your own git credentials. `autoUpdate: true` brings in new versions without anyone running `claude plugin marketplace update`.
 
 To check it's on, run `/plugin`: `call-timeline` should be listed as installed and enabled.
 
