@@ -41,6 +41,8 @@ export type Host = HostState & {
   sessionId: () => Promise<string>
   cwd: () => Promise<string>
   usage: () => Promise<SessionUsage>
+  /** Connected MCP servers' display names, by the server segment of their tools' wire names. */
+  mcpServers: () => Promise<Record<string, string>>
   store: {
     get: (key: string) => Promise<unknown>
     set: (key: string, value: unknown) => Promise<void>

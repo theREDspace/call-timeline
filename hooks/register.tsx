@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import type { Archive, Filter, SessionSummary, StatsSort, TimelineEvent, View } from '../types'
-import { newId } from './core/events'
+import { mcpServerOf, newId } from './core/events'
 import { paneActions } from './pane/controller'
 import { drawPane } from './pane/draw'
 import { kitOf } from './pane/kit'
@@ -65,6 +65,15 @@ function hostOf($: EngineInterface): Host {
     sessionId: () => $.session.id(),
     cwd: () => $.session.cwd(),
     usage: () => $.session.usage(),
+    mcpServers: async () => {
+      const names: Record<string, string> = {}
+      const usage = await $.session.usage({ breakdown: 'summary' })
+      for (const t of usage.context.breakdown?.mcpTools ?? []) {
+        const server = mcpServerOf(t.name)
+        if (server && t.serverName) names[server] = t.serverName
+      }
+      return names
+    },
     store: {
       get: key => $.store.get(key),
       set: (key, value) => $.store.set(key, value),

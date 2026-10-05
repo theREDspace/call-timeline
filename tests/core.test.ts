@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { callRow, describe, modelName, promptRow, stepResult, stepRow } from '../hooks/core/events'
+import { callRow, describe, modelName, promptRow, relabelMcp, stepResult, stepRow } from '../hooks/core/events'
 import { exportFile, toMarkdown } from '../hooks/core/export'
 import { compact, duration, oneLine, plural, usd } from '../hooks/core/format'
 import { arrange, visibleOf } from '../hooks/core/layout'
@@ -88,6 +88,22 @@ test('describe names each kind of call and picks the argument worth showing', as
   expect(describe({ tool: 'mcp__github__search_issues' })).toEqual({ kind: 'mcp', name: 'github › search_issues', detail: '' })
   expect(describe({ tool: 'Read', file_path: '/a/b/c.ts' }).detail).toBe('c.ts')
   expect(describe({ tool: 'Bash', command: 'ls' }).detail).toBe('ls')
+})
+
+test('describe names an MCP call by its server display name when known', async () => {
+  const tool = 'mcp__42224f91-3ae0-449f-8ba6-e95d98d77393__list_events'
+  expect(describe({ tool }).name).toBe('42224f91-3ae0-44 › list_events')
+  const names = { '42224f91-3ae0-449f-8ba6-e95d98d77393': 'claude.ai Google Calendar' }
+  expect(describe({ tool }, names).name).toBe('Google Calendar › list_events')
+  expect(describe({ tool: 'mcp__obsidian__read_note' }, { obsidian: 'obsidian' }).name).toBe('obsidian › read_note')
+})
+
+test('relabelMcp names old MCP rows by the head of their server id', async () => {
+  const names = { '42224f91-3ae0-449f-8ba6-e95d98d77393': 'claude.ai Google Calendar' }
+  const old = { id: 'x', kind: 'mcp' as const, name: '42224f91-3ae0-44 › list_events', detail: '', startedAt: 0, status: 'ok' as const }
+  expect(relabelMcp(old, names).name).toBe('Google Calendar › list_events')
+  expect(relabelMcp({ ...old, name: 'github › search' }, names).name).toBe('github › search')
+  expect(relabelMcp({ ...old, kind: 'tool' }, names).name).toBe(old.name)
 })
 
 test('row builders', async () => {

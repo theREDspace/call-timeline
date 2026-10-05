@@ -4,7 +4,9 @@ import type { Cell, Host, ScrollTarget } from '../hooks/services/host'
 import type { Archive, Filter, SessionSummary, StatsSort, TimelineEvent, View } from '../types'
 
 /** A Host answered from memory, for testing the services and the pane controller without an engine. */
-export function fakeHost(opts: { now?: number; sessionId?: string; cost?: number; percent?: number; cwd?: string } = {}) {
+export function fakeHost(
+  opts: { now?: number; sessionId?: string; cost?: number; percent?: number; cwd?: string; mcpServers?: Record<string, string> } = {},
+) {
   const cell = <T>(initial: T): Cell<T> & { value: T } => {
     const c = {
       value: initial,
@@ -53,6 +55,7 @@ export function fakeHost(opts: { now?: number; sessionId?: string; cost?: number
         rateLimits: [],
         ...(session.cost === undefined ? {} : { cost: { usd: session.cost } }),
       }),
+    mcpServers: async () => opts.mcpServers ?? {},
     store: {
       get: async key => store.get(key),
       set: async (key, value) => void store.set(key, JSON.parse(JSON.stringify(value))),
