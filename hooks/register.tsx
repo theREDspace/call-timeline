@@ -168,6 +168,8 @@ export const register: Register = on => {
       const atEnd = e.offset + e.bodyRows >= e.contentRows
       await update($, follow, f => (f === atEnd ? f : atEnd))
     }
+    // A wide timeline draws its details column at the scroll offset; redraw so it follows the window.
+    if ((await read($, view)) === 'timeline') $.ui.invalidate('ui.render')
     return result
   })
 
@@ -179,6 +181,8 @@ export const register: Register = on => {
       m,
       act: paneActions(host),
       width: e.props.bodyColumns ?? 60,
+      offset: e.props.scroll.offset,
+      rows: e.props.scroll.bodyRows,
       current: m.view === 'history' ? await $.session.id() : '',
     })
   })

@@ -120,7 +120,7 @@ test('a turn records model steps, calls, repeats, cost, context and history', as
         view: {},
       },
     })
-    expect(await ui.find({ type: 'Text', text: /1 steps/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /· 1 step ·/ })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: /↻3/ })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: /\$0\.25/ })).toBeDefined()
   }
@@ -269,4 +269,40 @@ test('a slash-command skill gets a row; the stats view totals by name', async ($
     await ui.press({ key: 'f-all' })
     await ui.press({ key: 'v-stats' })
   }
+})
+
+test('a wide pane opens rows in a details column beside the list', async ($, on) => {
+  mock.clock(on, { now: 6_000_000 })
+  world(on, { id: 'sess-6' })
+  on('turn.start', async (_$, e) => ({ turnId: e.turnId }))
+  on('tool.call', async () => ({ result: null, text: 'all green' }))
+
+  await $.turn.start({ text: 'check', turnId: 'turn-6' })
+  await $.tool.call({ tool: 'Bash', command: 'npm test', tool_use_id: 'b1' })
+  await $.tool.call({ tool: 'Read', file_path: '/repo/a.ts', tool_use_id: 'r1' })
+
+  const wide = { ...PANE_PROPS, bodyColumns: 240, scroll: { offset: 0, bodyRows: 40 } }
+  for (const surface of ['terminal', 'desktop'] as const) {
+    const ui = await $.ui.mount({ plugin: 'call-timeline', surface, component: 'Pane', requestId: 'timeline', props: wide })
+    // Nothing picked: the column shows the latest call, and no row opens inline.
+    expect(await ui.find({ type: 'Text', text: /latest, j\/k to pick/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /^Arguments$/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /all green/ })).toBeDefined()
+    // Wide, each turn gets a time axis, and the counts read in the singular where they should.
+    expect(await ui.find({ type: 'Text', text: /^0─+/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /^2 calls · 0 running · 0 errors$/ })).toBeDefined()
+    await ui.unmount()
+  }
+
+  // Opening a row pins the column to it.
+  const ui = await $.ui.mount({ plugin: 'call-timeline', surface: 'desktop', component: 'Pane', requestId: 'timeline', props: wide })
+  await ui.press({ key: 't-b1' })
+  expect(await ui.find({ type: 'Text', text: /latest, j\/k to pick/ })).toBeUndefined()
+  expect(await ui.findAll({ type: 'Text', text: /^Arguments$/ })).toHaveLength(1)
+  await ui.unmount()
+
+  // Below the split width, the open row's details are back under it.
+  const narrow = await $.ui.mount({ plugin: 'call-timeline', surface: 'terminal', component: 'Pane', requestId: 'timeline', props: PANE_PROPS })
+  expect(await narrow.find({ type: 'Text', text: /latest, j\/k to pick/ })).toBeUndefined()
+  expect(await narrow.find({ type: 'Text', text: /^Arguments$/ })).toBeDefined()
 })

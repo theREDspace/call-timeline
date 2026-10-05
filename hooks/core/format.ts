@@ -46,6 +46,8 @@ export const compact = (n: number) => {
   if (n < 1e6) return `${(n / 1000).toFixed(n < 1e4 ? 1 : 0)}k`
   return `${(n / 1e6).toFixed(1)}M`
 }
+/** `1 call`, `2 calls`. */
+export const plural = (n: number, word: string) => `${n} ${n === 1 ? word : `${word}s`}`
 export const usd = (n: number) => (n < 0.01 ? '<$0.01' : `$${n.toFixed(2)}`)
 
 /** A result this long is flagged on its row; past BIG_OUTPUT * 10 it is flagged loudly. */
