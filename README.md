@@ -2,6 +2,50 @@
 
 A Claude Code plugin that adds a live **call-timeline** pane showing every skill, tool, MCP call, subagent and model request a session makes, in order, with timing, tokens, cost, status, arguments and results.
 
+## Add it to your project
+
+Commit this to `.claude/settings.json` at the root of your repo (merge the two keys in if the file already exists):
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "redspace-plugins": {
+      "source": { "source": "github", "repo": "theREDspace/call-timeline" },
+      "autoUpdate": true
+    }
+  },
+  "enabledPlugins": {
+    "call-timeline@redspace-plugins": true
+  }
+}
+```
+
+Then start a new Claude Code session in that repo, in the terminal or the desktop app's Code tab:
+
+1. Trust the `redspace-plugins` marketplace when Claude Code asks. That installs the plugin.
+2. The timeline pane opens on its own. If it doesn't, run `/call-timeline`.
+
+Everyone who opens the repo gets the same prompt, so one commit sets it up for the whole team. You need read access to [theREDspace/call-timeline](https://github.com/theREDspace/call-timeline): Claude Code clones it with your own git credentials. `autoUpdate: true` brings in new versions without anyone running `claude plugin marketplace update`.
+
+To check it's on, run `/plugin`: `call-timeline` should be listed as installed and enabled.
+
+Optional: add `.claude/call-timeline/` to the project's `.gitignore` so exports don't get committed.
+
+<details>
+<summary>Just for you, in every project</summary>
+
+```bash
+claude plugin marketplace add theREDspace/call-timeline
+```
+
+```bash
+claude plugin install call-timeline@redspace-plugins --scope user
+```
+
+</details>
+
+To roll it out to the whole org through managed settings, see [TEAM_SETUP.md](TEAM_SETUP.md).
+
 ## Features
 
 - **Timeline** of calls, grouped under the prompt that triggered them. Each prompt row shows its turn's true duration (from `turn.start` to `turn.complete`), call and step counts, tokens in→out, what the turn cost, context fill when it ended, errors, and how it ended if not with an answer (`interrupted`, `refused`, `API error`). Turns with no typed prompt (continuations, scheduled wake-ups) get a `(continuation)` row. Each call row shows start time, a **waterfall bar**, name, live elapsed time, and the call's key argument (command, file name, pattern, URL, …).
