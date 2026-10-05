@@ -1,6 +1,8 @@
 import type { Archive, SessionSummary } from '../../types'
+import { relabelMcp } from '../core/events'
 import { isCall, isProblem } from '../core/timeline'
 import type { Host } from './host'
+import { storedServerNames } from './servers'
 
 /**
  * Past sessions in the plugin's store: an index of summaries, newest first, and one slimmed timeline per
@@ -69,5 +71,8 @@ export async function trySaveSession(host: Host) {
 export async function loadArchive(host: Host, id: string): Promise<Archive | undefined> {
   const arc = (await host.store.get(sessionKey(id))) as Partial<Archive> | undefined
   if (!arc || !Array.isArray(arc.events)) return undefined
-  return { id, title: typeof arc.title === 'string' && arc.title ? arc.title : '(no prompt)', events: arc.events }
+  // Sessions saved before a server's name was known show its id; name it now if it has been seen since.
+  const names = await storedServerNames(host)
+  const events = arc.events.map(ev => relabelMcp(ev, names))
+  return { id, title: typeof arc.title === 'string' && arc.title ? arc.title : '(no prompt)', events }
 }

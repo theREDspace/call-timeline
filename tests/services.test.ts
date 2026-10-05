@@ -246,3 +246,16 @@ test('view, filter, query and sort setters', async () => {
   const m = await readPane(f.host)
   expect([m.filter, m.query, m.sort]).toEqual(['mcp', 'grep', 'count'])
 })
+
+// ── MCP server names ─────────────────────────────────────────────────────────
+
+test('recordCall names an MCP call by its server and remembers the name for past sessions', async () => {
+  const id = '75bcc2c4-9960-437f-965d-eca1ed176569'
+  const f = fakeHost({ mcpServers: { [id]: 'claude.ai Gmail' } })
+  await recordCall(f.host, { tool: `mcp__${id}__search_threads` }, async () => ({ text: 'ok' }))
+  expect(f.state.events.value[0]?.name).toBe('Gmail › search_threads')
+  expect(f.store.get('mcpServers')).toEqual({ [id]: 'claude.ai Gmail' })
+
+  f.store.set('session:old', { id: 'old', title: 't', events: [row({ id: 'm', kind: 'mcp', name: '75bcc2c4-9960-43 › search_threads' })] })
+  expect((await loadArchive(f.host, 'old'))?.events[0]?.name).toBe('Gmail › search_threads')
+})

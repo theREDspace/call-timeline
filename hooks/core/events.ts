@@ -16,15 +16,45 @@ export const newId = (prefix: string, at: number) => `${prefix}-${at}-${rand()}`
 const str = (v: unknown) => (typeof v === 'string' ? v : '')
 const baseName = (p: string) => p.split('/').pop() ?? p
 
+/** MCP servers' display names, by the server segment of their tools' wire names (`mcp__<server>__<tool>`). */
+export type ServerNames = Record<string, string>
+
+/** The server segment of an MCP tool's wire name, or '' for any other tool. */
+export const mcpServerOf = (tool: string) => (tool.startsWith('mcp__') ? (tool.split('__')[1] ?? '') : '')
+
+/**
+ * How an MCP server is named in a row: its display name when known (a connector's `claude.ai ` prefix
+ * dropped, so `claude.ai Gmail` is `Gmail`), else the head of its wire name, which for a connector is an id.
+ */
+function serverLabel(server: string, names: ServerNames = {}) {
+  const known = sanitize(names[server] ?? '').replace(/^claude\.ai\s+/i, '')
+  return known || server.slice(0, 16)
+}
+
+/**
+ * An MCP row's name with its server's display name, for rows recorded before the name was known. Those
+ * carry the head of the wire name, so any server whose wire name starts with it matches.
+ */
+export function relabelMcp(ev: TimelineEvent, names: ServerNames): TimelineEvent {
+  if (ev.kind !== 'mcp') return ev
+  const [head = '', ...rest] = ev.name.split(' › ')
+  if (!rest.length || head.length < 16) return ev
+  const server = Object.keys(names).find(s => s !== head && s.slice(0, 16) === head)
+  return server ? { ...ev, name: [serverLabel(server, names), ...rest].join(' › ') } : ev
+}
+
 /** What a call is, and the one argument worth showing beside its name. */
-export function describe(e: { tool: string; [k: string]: unknown }): { kind: EventKind; name: string; detail: string } {
+export function describe(
+  e: { tool: string; [k: string]: unknown },
+  servers: ServerNames = {},
+): { kind: EventKind; name: string; detail: string } {
   const t = sanitize(e.tool)
   if (t === 'Skill') return { kind: 'skill', name: sanitize(str(e.skill)) || 'skill', detail: str(e.args) }
   if (t === 'Agent' || t === 'Task')
     return { kind: 'agent', name: sanitize(str(e.subagent_type)) || 'agent', detail: str(e.description) }
   if (t.startsWith('mcp__')) {
     const [, server = '', ...rest] = t.split('__')
-    return { kind: 'mcp', name: `${server.slice(0, 16)} › ${rest.join('__')}`, detail: '' }
+    return { kind: 'mcp', name: `${serverLabel(server, servers)} › ${rest.join('__')}`, detail: '' }
   }
   const detail =
     str(e.command) ||
@@ -52,8 +82,12 @@ export function promptRow(text: string, at: number, fallback: string): TimelineE
 }
 
 /** A running row for a tool, skill, MCP or Agent call. */
-export function callRow(input: { tool: string; tool_use_id?: string; agentId?: string; [k: string]: unknown }, at: number): TimelineEvent {
-  const { kind, name, detail } = describe(input)
+export function callRow(
+  input: { tool: string; tool_use_id?: string; agentId?: string; [k: string]: unknown },
+  at: number,
+  servers?: ServerNames,
+): TimelineEvent {
+  const { kind, name, detail } = describe(input, servers)
   return {
     id: input.tool_use_id || newId('call', at),
     kind,

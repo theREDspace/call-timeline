@@ -1,13 +1,14 @@
 import type { TurnStepInput, TurnStepResult } from 'claude-code'
 
 import type { EventStatus, TurnOutcome } from '../../types'
-import { callResult, callRow, promptRow, skillCommandRow, stepFailure, stepResult, stepRow } from '../core/events'
+import { callResult, callRow, mcpServerOf, promptRow, skillCommandRow, stepFailure, stepResult, stepRow } from '../core/events'
 import { GLYPHS } from '../core/format'
 import { append, appendCall, finishTurn, hasRecentSkill, interrupt, sameFailures, startTurn } from '../core/timeline'
 import { OUTCOME_LABEL } from '../core/turns'
 import { refreshHistory, trySaveSession } from './history'
 import type { Host } from './host'
 import { followEnd, patch, showRunning, updateRows } from './rows'
+import { serverNames } from './servers'
 
 /**
  * Records what the session does: prompts, turns, model requests, tool calls, subagents and slash-command
@@ -115,7 +116,8 @@ export async function recordCall<R extends { deny?: string; isError?: boolean; t
   e: { tool: string; [k: string]: unknown },
   run: () => Promise<R>,
 ): Promise<R> {
-  const row = callRow(e, await host.now())
+  const server = mcpServerOf(e.tool)
+  const row = callRow(e, await host.now(), server ? await serverNames(host, server) : undefined)
   showRunning(host, await host.events.set(appendCall(row)))
   await followEnd(host)
 
