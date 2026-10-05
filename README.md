@@ -135,3 +135,54 @@ tests/                       `claude plugin test .`: core unit tests, service te
 The engine reads every `$` call and state key off the hooks module, and follows `$` only into functions in the same file. So `register.tsx` is the one file that touches `$` or declares atoms; everything else gets a `Host` (closures built there), which also lets the services and pane controller be tested without an engine.
 
 State (events, filter, view, selection, search, follow, folds, stats sort) lives in plugin atoms, so it survives hot reloads. Past sessions live in the plugin's store. The timeline keeps the most recent 800 rows, trimming whole turns so no row outlives its prompt.
+
+## Developing locally
+
+Requires Node 24.11+ (`.nvmrc`). Install the dev tools once:
+
+```bash
+npm install
+```
+
+### Run it in Claude Code from your checkout
+
+Load the plugin straight from the working tree. Saving a file hot-reloads the hooks module (`register` runs again; state in atoms and the store survives).
+
+**Terminal:** start Claude Code from the repo root with:
+
+```bash
+claude --plugin-dir .
+```
+
+The flag applies to that session only.
+
+**Desktop app or another host that can't take flags:** add the folder to the `env` block of `~/.claude/settings.json`. Project settings are ignored for this.
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_PLUGIN_DIRS": "/absolute/path/to/call-timeline",
+    "CLAUDE_CODE_PLUGIN_DIR_WATCH": "1"
+  }
+}
+```
+
+`CLAUDE_CODE_PLUGIN_DIR_WATCH` turns on hot reload for long-lived hosts like the desktop app. Because this is user-level, the plugin loads in **every** session in every repo until you remove those lines.
+
+Either way, the plugin shows in `claude plugin list` as `call-timeline@inline`. Don't also have the marketplace copy (`call-timeline@redspace-plugins`) enabled where you develop, or the hooks run twice and you get two panes. If a repo enables it in its `.claude/settings.json`, turn it off for yourself there with `claude plugin disable call-timeline@redspace-plugins --scope local`.
+
+A hook that fails or a module that won't load is reported as a dim line in the transcript naming the plugin, event and reason. Run `claude --debug` for the full log.
+
+### Check and test
+
+| Command | What it does |
+| --- | --- |
+| `claude plugin validate .` | Reads the manifests and hooks module the way the engine will and reports anything it would refuse |
+| `npm test` | `claude plugin test .`: runs `tests/*.test.ts(x)` against the real engine |
+| `npm run check` | Typecheck, lint and dead-code scan (`typecheck`, `lint`, `deadcode`) |
+
+`tsconfig.json` extends `.claude-plugin/types/tsconfig.json`, which the engine writes, along with the API types, each time it loads the plugin. Load the plugin once (above) before `npm run typecheck` or editor type-checking will work. Both `.claude-plugin/types/` and `.claude/types/` are gitignored.
+
+### Shipping a change
+
+Bump `version` in `.claude-plugin/plugin.json` and merge to `main`. Installs with `autoUpdate: true` pick it up; see [TEAM_SETUP.md](TEAM_SETUP.md) for the rollout.
