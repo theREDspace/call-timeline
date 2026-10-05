@@ -1,0 +1,8 @@
+{
+  "$schema": "./node_modules/fallow/schema.json",
+  // The engine loads hooks/register.tsx (hooks/hooks.json); `claude plugin test .` runs tests/
+  "entry": ["hooks/register.tsx", "tests/**/*.test.{ts,tsx}", "types/index.d.ts"],
+  "ignorePatterns": [".claude/**", ".claude-plugin/types/**"],
+  // `claude-code` is provided by the engine at runtime, not npm
+  "ignoreDependencies": ["claude-code"]
+}

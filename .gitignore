@@ -1,0 +1,19 @@
+# Timeline exports (/timeline export, w in the pane)
+.claude/call-timeline/
+
+# Personal Claude Code settings
+.claude/settings.local.json
+
+# Engine-written API types (rewritten on each load)
+.claude-plugin/types/
+.claude/types/
+
+node_modules/
+.DS_Store
+
+# GitNexus index and project-local registry (rebuild with npm run gitnexus:analyze)
+.gitnexus/
+.gitnexus-home/
+
+# fallow cache
+.fallow/

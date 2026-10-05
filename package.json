@@ -1,0 +1,47 @@
+{
+  "name": "call-timeline",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.11.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "deadcode": "fallow dead-code",
+    "fallow": "fallow",
+    "gitnexus:analyze": "GITNEXUS_HOME=.gitnexus-home gitnexus analyze",
+    "gitnexus:status": "GITNEXUS_HOME=.gitnexus-home gitnexus status",
+    "gitnexus:changes": "GITNEXUS_HOME=.gitnexus-home gitnexus detect-changes --scope all --repo .",
+    "check": "npm run typecheck && npm run lint && npm run deadcode",
+    "test": "claude plugin test ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.12.0",
+    "fallow": "^3.31.0",
+    "gitnexus": "^1.6.12",
+    "globals": "^17.13.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.0"
+  },
+  "allowScripts": {
+    "@scarf/scarf": false,
+    "@ladybugdb/core@0.18.3": true,
+    "gitnexus@1.6.12": true,
+    "onnxruntime-node@1.30.0": true,
+    "protobufjs@7.6.6": true,
+    "tree-sitter@0.21.1": true,
+    "tree-sitter-c-sharp@0.23.1": true,
+    "tree-sitter-cpp@0.23.2": true,
+    "tree-sitter-go@0.23.4": true,
+    "tree-sitter-java@0.23.5": true,
+    "tree-sitter-javascript@0.23.1": true,
+    "tree-sitter-php@0.23.12": true,
+    "tree-sitter-python@0.23.4": true,
+    "tree-sitter-ruby@0.23.1": true,
+    "tree-sitter-rust@0.23.1": true,
+    "tree-sitter-typescript@0.23.2": true
+  }
+}

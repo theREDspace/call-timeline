@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "gitnexus": {
+      "command": "npx",
+      "args": ["--no-install", "gitnexus", "mcp"],
+      "env": { "GITNEXUS_HOME": "${CLAUDE_PROJECT_DIR:-.}/.gitnexus-home" }
+    },
+    "fallow": {
+      "command": "npx",
+      "args": ["--no-install", "fallow-mcp"]
+    }
+  }
+}
