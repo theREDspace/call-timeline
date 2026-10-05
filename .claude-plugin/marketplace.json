@@ -1,0 +1,12 @@
+{
+  "name": "redspace-plugins",
+  "owner": { "name": "REDspace" },
+  "description": "Internal Claude Code plugins",
+  "plugins": [
+    {
+      "name": "call-timeline",
+      "source": "./",
+      "description": "Live timeline pane of the skills, tools, MCP calls, subagents and model requests a session makes"
+    }
+  ]
+}

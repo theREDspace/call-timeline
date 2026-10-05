@@ -2,5 +2,8 @@
   "name": "call-timeline",
   "version": "1.3.0",
   "description": "Live timeline pane of the skills, tools, MCP calls, subagents and model requests a session makes",
+  "author": {
+    "name": "REDspace"
+  },
   "types": "./types/index.d.ts"
 }
