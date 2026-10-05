@@ -1,8 +1,24 @@
 {
   "$schema": "./node_modules/fallow/schema.json",
-  // The engine loads hooks/register.tsx (hooks/hooks.json); `claude plugin test .` runs tests/
-  "entry": ["hooks/register.tsx", "tests/**/*.test.{ts,tsx}", "types/index.d.ts"],
+  // The engine loads hooks/register.tsx (hooks/hooks.json)
+  "entry": ["hooks/register.tsx", "types/index.d.ts"],
   "ignorePatterns": [".claude/**", ".claude-plugin/types/**"],
   // `claude-code` is provided by the engine at runtime, not npm
-  "ignoreDependencies": ["claude-code"]
+  "ignoreDependencies": ["claude-code"],
+  // `claude plugin test .` runs tests/. Declaring it as a test framework makes those files test
+  // roots for coverage-gaps and CRAP, instead of plain entries that leave everything "untested".
+  // The runner also loads hooks/register.tsx (via hooks.json) for every test file, which no
+  // import shows, so it is a test root too: tests reach the pane through the engine, not imports.
+  "framework": [
+    {
+      "name": "claude-plugin-test",
+      "detection": { "type": "fileExists", "pattern": "tests/**/*.test.{ts,tsx}" },
+      "entryPoints": ["tests/**/*.test.{ts,tsx}", "hooks/register.tsx"],
+      "entryPointRole": "test"
+    }
+  ],
+  // Long scenario tests branch on optional chains, not logic; keep them out of complexity findings.
+  "health": {
+    "ignore": ["tests/**"]
+  }
 }
