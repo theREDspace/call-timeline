@@ -1,5 +1,5 @@
 import type { TimelineEvent } from '../../types'
-import { BIG_OUTPUT, clock, compact, duration, GLYPHS, stamp } from './format'
+import { BIG_OUTPUT, clock, compact, duration, GLYPHS, plural, stamp } from './format'
 import { arrange } from './layout'
 import { isCall, loopLabel } from './timeline'
 import { OUTCOME_LABEL, turnSummary, turnsOf } from './turns'
@@ -10,14 +10,14 @@ const EXPORT_DIR = '.claude/call-timeline'
 
 export function toMarkdown(list: readonly TimelineEvent[], now: number, title = 'Call timeline') {
   const { byPrompt } = turnsOf(list, now)
-  const lines = [`# ${title}`, '', `Exported ${new Date(now).toISOString()} · ${list.filter(isCall).length} calls`, '']
+  const lines = [`# ${title}`, '', `Exported ${new Date(now).toISOString()} · ${plural(list.filter(isCall).length, 'call')}`, '']
   for (const { ev, depth, orphan } of arrange(list, [])) {
     if (ev.kind === 'prompt') {
       lines.push('', `## ${clock(ev.startedAt)} › ${ev.name}`, '')
       const summary = turnSummary(ev, byPrompt.get(ev.id))
       const outcome = ev.outcome ? OUTCOME_LABEL[ev.outcome] : ''
       const problems = byPrompt.get(ev.id)?.problems ?? 0
-      const tail = [summary, problems ? `${problems} errors` : '', outcome].filter(Boolean).join(' · ')
+      const tail = [summary, problems ? plural(problems, 'error') : '', outcome].filter(Boolean).join(' · ')
       if (tail) lines.push(`_${tail}_`, '')
       continue
     }

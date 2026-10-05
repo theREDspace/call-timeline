@@ -1,6 +1,6 @@
 import type { TimelineEvent, TurnOutcome } from '../../types'
 import { tokensIn } from './events'
-import { compact, duration, usd } from './format'
+import { compact, duration, plural, usd } from './format'
 import { isProblem } from './timeline'
 
 /** Turns: the span, counts and totals of each prompt's work, and where each row falls within it. */
@@ -48,8 +48,8 @@ export function turnSummary(ev: TimelineEvent, t: Turn | undefined) {
   if (t && (t.calls || t.steps || ev.status === 'running' || ev.outcome)) {
     parts.push(ev.status === 'running' ? `${duration(t.end - t.start)}…` : duration(t.end - t.start))
   }
-  if (t?.calls) parts.push(`${t.calls} calls`)
-  if (t?.steps) parts.push(`${t.steps} steps`)
+  if (t?.calls) parts.push(plural(t.calls, 'call'))
+  if (t?.steps) parts.push(plural(t.steps, 'step'))
   if (t && (t.tokIn || t.tokOut)) parts.push(`${compact(t.tokIn)}→${compact(t.tokOut)} tok`)
   if (ev.costUsd !== undefined) parts.push(usd(ev.costUsd))
   if (ev.contextPercent !== undefined) parts.push(`ctx ${ev.contextPercent}%`)
@@ -60,6 +60,22 @@ export function turnSummary(ev: TimelineEvent, t: Turn | undefined) {
  * A row's waterfall bar, `width` cells wide: `lead` cells before it (where it fell within its turn), then
  * `wait` cells waiting for a model's first token, then `run` cells working. Overlapping bars are parallel work.
  */
+/**
+ * The time axis drawn above a turn's bars, `width` cells: `0` at the left, the turn's length at the
+ * right, and its midpoint between when there is room.
+ */
+export function ruler(spanMs: number, width: number) {
+  const cells = Array.from({ length: width }, () => '─')
+  const marks: [number, string][] = [[0, '0'], [1, duration(spanMs)]]
+  if (width >= 30) marks.push([0.5, duration(Math.round(spanMs / 2))])
+  for (const [at, label] of marks) {
+    const anchor = at === 0 ? 0 : at === 1 ? width - label.length : Math.round(at * width - label.length / 2)
+    const from = Math.max(0, Math.min(width - label.length, anchor))
+    for (let i = 0; i < label.length && from + i < width; i++) cells[from + i] = label[i] ?? ''
+  }
+  return cells.join('')
+}
+
 export function waterfall(ev: TimelineEvent, turn: Turn | undefined, now: number, width: number) {
   const ms = (ev.endedAt ?? now) - ev.startedAt
   const start = turn?.start ?? ev.startedAt

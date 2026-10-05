@@ -2,7 +2,7 @@ import { expect, test } from 'claude-code/testing'
 
 import { callRow, describe, modelName, promptRow, stepResult, stepRow } from '../hooks/core/events'
 import { exportFile, toMarkdown } from '../hooks/core/export'
-import { compact, duration, oneLine, usd } from '../hooks/core/format'
+import { compact, duration, oneLine, plural, usd } from '../hooks/core/format'
 import { arrange, visibleOf } from '../hooks/core/layout'
 import { argsJson, clean, sanitize } from '../hooks/core/redact'
 import { nextSort, outLabel, statsOf } from '../hooks/core/stats'
@@ -19,7 +19,7 @@ import {
   sameFailures,
   startTurn,
 } from '../hooks/core/timeline'
-import { turnSummary, turnsOf, waterfall } from '../hooks/core/turns'
+import { ruler, turnSummary, turnsOf, waterfall } from '../hooks/core/turns'
 import type { TimelineEvent } from '../types'
 import { row } from './fake-host'
 
@@ -240,7 +240,7 @@ test('turnsOf totals each turn, and turnSummary says it in one line', async () =
   const t = byPrompt.get('p')
   expect(t).toMatchObject({ start: 0, end: 4000, calls: 1, steps: 1, problems: 1, tokIn: 1000, tokOut: 50 })
   expect(turnOf.get('c')).toBe(t)
-  expect(turnSummary(list[0]!, t)).toBe('4.0s · 1 calls · 1 steps · 1.0k→50 tok · $0.25 · ctx 40%')
+  expect(turnSummary(list[0]!, t)).toBe('4.0s · 1 call · 1 step · 1.0k→50 tok · $0.25 · ctx 40%')
 })
 
 test('waterfall places a bar within its turn and splits a model step at its first token', async () => {
@@ -306,4 +306,19 @@ test('exportFile picks format and path from its argument', async () => {
   expect(exportFile('out/run.json', list, 0)).toMatchObject({ path: 'out/run.json', format: 'json' })
   expect(exportFile('md out/run.txt', list, 0)).toMatchObject({ path: 'out/run.txt', format: 'md' })
   expect(exportFile('', list, 0, { id: 's', title: 'old' }).text).toContain('# Call timeline: old')
+})
+
+test('plural counts one as singular', async () => {
+  expect(plural(1, 'call')).toBe('1 call')
+  expect(plural(0, 'error')).toBe('0 errors')
+  expect(plural(3, 'step')).toBe('3 steps')
+})
+
+test('ruler marks a turn from 0 to its length, with the midpoint when there is room', async () => {
+  expect(ruler(20_000, 20)).toBe(`0${'─'.repeat(14)}20.0s`)
+  const wide = ruler(20_000, 40)
+  expect(wide).toHaveLength(40)
+  expect(wide.startsWith('0─')).toBe(true)
+  expect(wide.endsWith('─20.0s')).toBe(true)
+  expect(wide).toContain('─10.0s─')
 })

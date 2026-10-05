@@ -5,6 +5,7 @@ import { COLORS, duration, GLYPHS } from '../core/format'
 import { visibleOf } from '../core/layout'
 import { outLabel, statsOf } from '../core/stats'
 import type { Kit } from './kit'
+import { WIDE } from './timeline-view'
 import type { PaneModel } from './model'
 
 /** Per-name totals over what the timeline would show: the same filter, search and focus. */
@@ -17,7 +18,8 @@ export function StatsView({ ui, m, width }: { ui: Kit; m: PaneModel; width: numb
   )
   if (rows.length === 0) return <Text dimColor>{m.query || m.filter !== 'all' ? 'No calls match.' : 'No calls yet.'}</Text>
 
-  const nameW = Math.max(12, Math.min(32, width - 67))
+  // The numeric columns take 67 cells; names get the rest, up to 32, or 60 in a wide pane.
+  const nameW = Math.max(12, Math.min(width >= WIDE ? 60 : 32, width - 67))
   const col = (w: number, label: string, key: StatsSort | '') => (
     <Box width={w}>
       <Text bold underline={key !== '' && key === m.sort}>
