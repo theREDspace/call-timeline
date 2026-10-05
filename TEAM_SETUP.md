@@ -67,7 +67,7 @@ Or inside a session: `/plugin marketplace add <your-org>/call-timeline`, then `/
 
 In the desktop app's Code tab: **+** → **Plugins** → **Manage plugins** → add the marketplace, then install.
 
-Start a new session; the timeline pane should open on its own (or run `/timeline`).
+Start a new session; the timeline pane should open on its own (or run `/call-timeline`).
 
 ## Step 4 — Turn it on for everyone in a project (no admin needed)
 

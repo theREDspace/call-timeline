@@ -206,7 +206,7 @@ test('subagent calls nest under their Agent row, survive filters, and can be foc
   expect(await ui.find({ type: 'Text', text: /^Grep$/ })).toBeDefined()
 })
 
-test('/timeline opens the pane, exports, and opens history', async ($, on) => {
+test('/call-timeline opens the pane, exports, and opens history', async ($, on) => {
   mock.clock(on, { now: 4_000_000 })
   const { store } = world(on, { id: 'sess-4' })
   const files = new Map<string, string>()
@@ -224,7 +224,7 @@ test('/timeline opens the pane, exports, and opens history', async ($, on) => {
   on('turn.complete', async () => ({ text: '' }))
   on('tool.call', async () => ({ result: null, text: 'ok' }))
   const run = (args: string) =>
-    $.command.run({ command: 'timeline', args, origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 120 } })
+    $.command.run({ command: 'call-timeline', args, origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 120 } })
 
   await $.turn.start({ text: 'export me', turnId: 'turn-4' })
   await $.tool.call({ tool: 'Bash', command: 'ls', tool_use_id: 'b1' })
