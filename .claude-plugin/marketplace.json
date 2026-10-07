@@ -5,7 +5,7 @@
   "plugins": [
     {
       "name": "call-timeline",
-      "source": "./",
+      "source": "./plugin",
       "description": "Live timeline pane of the skills, tools, MCP calls, subagents and model requests a session makes"
     }
   ]

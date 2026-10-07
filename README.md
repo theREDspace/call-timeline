@@ -155,30 +155,34 @@ These appear in the timeline view only.
 
 ## Layout
 
+The plugin lives in `plugin/`, and the marketplace's `source` points there. Only that folder is installed, so the repo-root dev setup (`.mcp.json` with the GitNexus and fallow servers, `.claude/skills/`, `AGENTS.md`) stays out of other people's sessions. Keep anything users shouldn't get outside `plugin/`.
+
 ```
-.claude-plugin/plugin.json   Plugin manifest
-hooks/hooks.json             Hook module list
-hooks/register.tsx           Entry: state atoms, the Host adapter over `$`, and thin hooks that delegate
-hooks/core/                  Pure logic over rows, no engine access
-  events.ts                    Building rows from prompts, calls and model requests
-  redact.ts                    Hardening: escape stripping, secret redaction, caps
-  timeline.ts                  Every change to the row list (append, repeats, turns, interrupt, cap)
-  layout.ts                    Subagent grouping, folding, focus, filters, search, tree connectors
-  turns.ts                     Turn totals, summaries and waterfall bar geometry
-  stats.ts                     Per-name aggregates and sorting for the Stats view
-  export.ts                    Markdown/JSON export text and file naming
-  format.ts                    Durations, sizes, money, colors and glyphs
-hooks/services/              Work that needs the engine, written against the Host port
-  host.ts                      The Host interface: state cells plus the engine calls the plugin uses
-  recorder.ts                  One function per engine event that records rows
-  history.ts                   Saved sessions in the plugin's store
-  exporter.ts, rows.ts         Writing exports; row writes that keep undo, status and scroll in step
-hooks/pane/                  The pane
-  model.ts                     One snapshot of everything a draw reads
-  controller.ts                Every press and hotkey's action
-  draw.tsx, header.tsx, *-view.tsx   The drawing, one file per view
-types/index.d.ts             Event types and the plugin's state shape
-tests/                       `claude plugin test .`: core unit tests, service tests on a fake Host, engine tests
+.claude-plugin/marketplace.json  Marketplace manifest; points at plugin/
+plugin/                          Everything that ships to users (the plugin root)
+  .claude-plugin/plugin.json   Plugin manifest
+  hooks/hooks.json             Hook module list
+  hooks/register.tsx           Entry: state atoms, the Host adapter over `$`, and thin hooks that delegate
+  hooks/core/                  Pure logic over rows, no engine access
+    events.ts                    Building rows from prompts, calls and model requests
+    redact.ts                    Hardening: escape stripping, secret redaction, caps
+    timeline.ts                  Every change to the row list (append, repeats, turns, interrupt, cap)
+    layout.ts                    Subagent grouping, folding, focus, filters, search, tree connectors
+    turns.ts                     Turn totals, summaries and waterfall bar geometry
+    stats.ts                     Per-name aggregates and sorting for the Stats view
+    export.ts                    Markdown/JSON export text and file naming
+    format.ts                    Durations, sizes, money, colors and glyphs
+  hooks/services/              Work that needs the engine, written against the Host port
+    host.ts                      The Host interface: state cells plus the engine calls the plugin uses
+    recorder.ts                  One function per engine event that records rows
+    history.ts                   Saved sessions in the plugin's store
+    exporter.ts, rows.ts         Writing exports; row writes that keep undo, status and scroll in step
+  hooks/pane/                  The pane
+    model.ts                     One snapshot of everything a draw reads
+    controller.ts                Every press and hotkey's action
+    draw.tsx, header.tsx, *-view.tsx   The drawing, one file per view
+  types/index.d.ts             Event types and the plugin's state shape
+  tests/                       `claude plugin test plugin`: core unit tests, service tests on a fake Host, engine tests
 ```
 
 The engine reads every `$` call and state key off the hooks module, and follows `$` only into functions in the same file. So `register.tsx` is the one file that touches `$` or declares atoms; everything else gets a `Host` (closures built there), which also lets the services and pane controller be tested without an engine.
@@ -200,7 +204,7 @@ Load the plugin straight from the working tree. Saving a file hot-reloads the ho
 **Terminal:** start Claude Code from the repo root with:
 
 ```bash
-claude --plugin-dir .
+claude --plugin-dir plugin
 ```
 
 The flag applies to that session only.
@@ -210,7 +214,7 @@ The flag applies to that session only.
 ```json
 {
   "env": {
-    "CLAUDE_CODE_PLUGIN_DIRS": "/absolute/path/to/call-timeline",
+    "CLAUDE_CODE_PLUGIN_DIRS": "/absolute/path/to/call-timeline/plugin",
     "CLAUDE_CODE_PLUGIN_DIR_WATCH": "1"
   }
 }
@@ -226,12 +230,12 @@ A hook that fails or a module that won't load is reported as a dim line in the t
 
 | Command | What it does |
 | --- | --- |
-| `claude plugin validate .` | Reads the manifests and hooks module the way the engine will and reports anything it would refuse |
-| `npm test` | `claude plugin test .`: runs `tests/*.test.ts(x)` against the real engine |
+| `claude plugin validate plugin` | Reads the plugin manifest and hooks module the way the engine will and reports anything it would refuse (`claude plugin validate .` checks the marketplace manifest) |
+| `npm test` | `claude plugin test plugin`: runs `plugin/tests/*.test.ts(x)` against the real engine |
 | `npm run check` | Typecheck, lint and dead-code scan (`typecheck`, `lint`, `deadcode`) |
 
-`tsconfig.json` extends `.claude-plugin/types/tsconfig.json`, which the engine writes, along with the API types, each time it loads the plugin. Load the plugin once (above) before `npm run typecheck` or editor type-checking will work. Both `.claude-plugin/types/` and `.claude/types/` are gitignored.
+`plugin/tsconfig.json` extends `plugin/.claude-plugin/types/tsconfig.json`, which the engine writes, along with the API types, each time it loads the plugin. Load the plugin once (above) before `npm run typecheck` or editor type-checking will work. Both `plugin/.claude-plugin/types/` and `.claude/types/` are gitignored.
 
 ### Shipping a change
 
-Bump `version` in `.claude-plugin/plugin.json` and merge to `main`. Installs with `autoUpdate: true` pick it up; see [TEAM_SETUP.md](TEAM_SETUP.md) for the rollout.
+Bump `version` in `plugin/.claude-plugin/plugin.json` and merge to `main`. Installs with `autoUpdate: true` pick it up; see [TEAM_SETUP.md](TEAM_SETUP.md) for the rollout.
