@@ -4,7 +4,7 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
-    ignores: ['node_modules/', '.claude/', '.claude-plugin/types/', '.gitnexus/', '.fallow/'],
+    ignores: ['node_modules/', '.claude/', 'plugin/.claude-plugin/types/', '.gitnexus/', '.fallow/'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
@@ -25,12 +25,12 @@ export default tseslint.config(
   },
   {
     // Strips terminal escape sequences on purpose
-    files: ['hooks/core/redact.ts'],
+    files: ['plugin/hooks/core/redact.ts'],
     rules: { 'no-control-regex': 'off' },
   },
   {
     // Fakes implement async engine interfaces without awaiting anything
-    files: ['tests/**'],
+    files: ['plugin/tests/**'],
     rules: { '@typescript-eslint/require-await': 'off' },
   },
   {

@@ -6,7 +6,7 @@
     "node": ">=24.11.0"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p plugin/tsconfig.json",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "deadcode": "fallow dead-code",
@@ -15,7 +15,7 @@
     "gitnexus:status": "GITNEXUS_HOME=.gitnexus-home gitnexus status",
     "gitnexus:changes": "GITNEXUS_HOME=.gitnexus-home gitnexus detect-changes --scope all --repo .",
     "check": "npm run typecheck && npm run lint && npm run deadcode",
-    "test": "claude plugin test ."
+    "test": "claude plugin test plugin"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

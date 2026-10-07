@@ -26,7 +26,7 @@ Private repos are fine: Claude Code clones with each person's existing git crede
 
 ## Step 2 — Make the repo a marketplace
 
-Add `.claude-plugin/marketplace.json` next to the existing `plugin.json`. The plugin lives at the repo root, so its source is `./`:
+Add `.claude-plugin/marketplace.json` at the repo root. The plugin lives in `plugin/`, so its source is `./plugin`:
 
 ```json
 {
@@ -36,7 +36,7 @@ Add `.claude-plugin/marketplace.json` next to the existing `plugin.json`. The pl
   "plugins": [
     {
       "name": "call-timeline",
-      "source": "./",
+      "source": "./plugin",
       "description": "Live timeline pane of the skills, tools, MCP calls, subagents and model requests a session makes"
     }
   ]
@@ -49,7 +49,7 @@ Validate it, then commit and push:
 claude plugin validate .
 ```
 
-> If you expect to ship more plugins, put the marketplace in its own repo (e.g. `<your-org>/claude-plugins`) and reference this one with `"source": { "source": "github", "repo": "<your-org>/call-timeline" }` instead of `"./"`.
+> If you expect to ship more plugins, put the marketplace in its own repo (e.g. `<your-org>/claude-plugins`) and reference this one with `"source": { "source": "github", "repo": "<your-org>/call-timeline" }` instead of `"./plugin"`. That installs the whole repo root, though, including the dev-only `.mcp.json`, so use a source that points at the `plugin/` folder.
 
 ## Step 3 — Install it yourself
 
@@ -140,7 +140,7 @@ On any teammate's machine:
 ## Things specific to this plugin
 
 - **It's a hooks module ("mod")**, not a plain command/skill plugin: `hooks/hooks.json` loads `hooks/register.tsx`, which runs inside Claude Code. If an Owner has set `allowManagedModsOnly` (or `allowManagedHooksOnly`) in managed settings, it will only load when it is enabled through managed settings (Step 5), not per-project or per-user.
-- **Shipping updates:** bump `version` in `.claude-plugin/plugin.json`, push, and clients with `autoUpdate: true` pick it up. Others can run:
+- **Shipping updates:** bump `version` in `plugin/.claude-plugin/plugin.json`, push, and clients with `autoUpdate: true` pick it up. Others can run:
 
   ```bash
   claude plugin marketplace update <your-org>-plugins

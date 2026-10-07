@@ -5,7 +5,7 @@
 .claude/settings.local.json
 
 # Engine-written API types (rewritten on each load)
-.claude-plugin/types/
+plugin/.claude-plugin/types/
 .claude/types/
 
 node_modules/
